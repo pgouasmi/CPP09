@@ -25,10 +25,10 @@ RM = @rm -rf
 CC = @c++
 DIR = @mkdir -p
 PRINT = @echo
-HEADERS =	BitcoinExchange.hpp
+HEADERS =	RPN.hpp
 
 FILES =		main \
-			BitcoinExchange
+			RPN
 
 
 OBJS = $(addsuffix .o, $(addprefix Objects/, $(FILES)))
