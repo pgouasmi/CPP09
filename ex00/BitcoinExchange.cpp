@@ -1,6 +1,14 @@
-//
-// Created by pgouasmi on 2/15/24.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   BitcoinExchange.cpp                                :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: pgouasmi <pgouasmi@student.42lyon.fr>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/02/19 14:15:40 by pgouasmi          #+#    #+#             */
+/*   Updated: 2024/02/19 14:15:40 by pgouasmi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "BitcoinExchange.hpp"
 
@@ -90,7 +98,7 @@ static float getPrevious(std::string key, std::map<std::string, std::string> map
 //	std::cout << it->first << ", " << key << std::endl;
 
 	if (it->first > key)
-		return 0;
+		throw BitcoinExchange::BadInputException();
 	while (it != map.end() && it->first < key)
 	{
 //		std::cout << it->first << std::endl;
@@ -115,10 +123,12 @@ void parseValue(std::string value)
 	res = strtof(value.c_str(), &pEnd);
 	if (res < 0)
 		throw BitcoinExchange::NotPositiveException();
-	if (res > 1000)
+//	if (res > 999)
+//		std::cout << std::endl << res << std::endl << std::endl;
+	if (res >= 1000)
 		throw BitcoinExchange::TooLargeException();
 	if (pEnd[0])
-		throw BitcoinExchange::NotANumberException();
+		throw BitcoinExchange::BadInputException();
 }
 
 static void checkDate(std::string year, std::string month, std::string day)
@@ -152,7 +162,7 @@ static void checkDate(std::string year, std::string month, std::string day)
 			{
 				if (!yearI % 100)
 				{
-					if (yearI % 400) {
+					if (!yearI % 400) {
 						if (dayI > 28)
 							throw BitcoinExchange::BadInputException();
 					}
@@ -220,6 +230,8 @@ void	BitcoinExchange::display()
 		{
 			try
 			{
+				if (line.empty())
+					throw BadInputException();
 				key = getKey(line, 1);;
 				value = this->getValue(line, 1);
 				parseInput(key, value);
@@ -232,7 +244,7 @@ void	BitcoinExchange::display()
 			}
 			catch (BitcoinExchange::BadInputException &e)
 			{
-				std::cout << e.what() << key << std::endl;
+				std::cout << e.what() << line << std::endl;
 			}
 			catch (std::exception &e)
 			{
