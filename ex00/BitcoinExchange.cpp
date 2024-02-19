@@ -141,7 +141,10 @@ static void checkDate(std::string year, std::string month, std::string day)
 	monthI = atoi(month.c_str());
 	dayI = atoi(day.c_str());
 
-	if (monthI < 1 || monthI > 12)
+	if (yearI < 0 || monthI < 1 || dayI < 1)
+		throw BitcoinExchange::BadInputException();
+
+	if (monthI > 12)
 		BitcoinExchange::BadInputException();
 	if (monthI == 1 || monthI == 3 || monthI == 5 || monthI == 7 || monthI == 8 || monthI == 10 || monthI == 12)
 	{
@@ -152,7 +155,6 @@ static void checkDate(std::string year, std::string month, std::string day)
 	{
 		if (monthI == 2)
 		{
-//			float bis;
 			if (yearI % 4)
 			{
 				if (dayI > 28)
@@ -173,6 +175,11 @@ static void checkDate(std::string year, std::string month, std::string day)
 				}
 			}
 
+		}
+		else
+		{
+			if (dayI > 30)
+				throw BitcoinExchange::BadInputException();
 		}
 	}
 
@@ -203,6 +210,8 @@ static void parseKey(std::string key)
 	//check fevrier
 	//check mois
 
+	if (year.find_first_not_of("0123456789") != std::string::npos || month.find_first_not_of("0123456789") != std::string::npos || day.find_first_not_of("0123456789") != std::string::npos)
+		throw BitcoinExchange::BadInputException();
 	checkDate(year, month, day);
 }
 
