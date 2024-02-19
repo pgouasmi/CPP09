@@ -10,8 +10,17 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <time.h>
 
 class BitcoinExchange {
+private:
+	BitcoinExchange();
+
+	std::map<std::string, std::string> _datacsv;
+	std::map<std::string, std::string> _datainput;
+	std::ifstream _input;
+	std::ifstream _csv;
+
 public:
 
 	BitcoinExchange(const char *arg);
@@ -22,19 +31,7 @@ public:
 	void scrapeCSV();
 	void scrapeInput();
 	void display();
-	double getValue(const std::string &line, int type);
-
-
-
-
-
-private:
-	BitcoinExchange();
-
-	std::map<std::string, double> _datacsv;
-	std::map<std::string, double> _datainput;
-	std::ifstream _input;
-	std::ifstream _csv;
+	std::string getValue(const std::string &line, int type);
 
 
 class FileNonOpenableException : public std::exception
@@ -49,7 +46,8 @@ class NotPositiveException : public std::exception
 
 class BadInputException : public std::exception
 {
-	const char *what() const throw() { return ("Error: bad input => "); }
+public:
+		const char *what() const throw() { return ("Error: bad input => "); }
 };
 
 class TooLargeException : public std::exception

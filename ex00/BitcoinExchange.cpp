@@ -35,24 +35,18 @@ static std::string getKey(const std::string &line, int type)
 	return result;
 }
 
-double BitcoinExchange::getValue(const std::string &line, int type)
+std::string BitcoinExchange::getValue(const std::string &line, int type)
 {
-	double result;
-	std::string temp;
-	char *pEnd;
+	std::string result;
 
 	if (!type)
-		temp = line.substr(line.find(",") + 1);
-	else
-		temp = line.substr(line.find(" | ") + 3);
-	const char *arr = temp.c_str();
-	result = strtod(arr, &pEnd);
-	if (pEnd[0])
-		throw NotANumberException();
-	else if  (result < 0)
-		throw NotPositiveException();
-	else
-		return result;
+		result = line.substr(line.find(",") + 1);
+	else {
+		result = line.substr(line.find(" | ") + 3);
+		if (result.empty())
+			throw BadInputException();
+	}
+	return result;
 }
 
 static bool check_first(const std::string &line, const size_t i, int type)
@@ -66,10 +60,9 @@ static bool check_first(const std::string &line, const size_t i, int type)
 
 void	BitcoinExchange::scrapeCSV()
 {
-//	int error = 0;
 	std::string line;
 	std::string key;
-	double value;
+	std::string value;
 	size_t i = 0;
 
 	while (std::getline(_csv, line))
@@ -79,28 +72,135 @@ void	BitcoinExchange::scrapeCSV()
 			if (line.empty())
 				break;
 			key = getKey(line, 0);
-			this->getValue(line, 0);
+			value = this->getValue(line, 0);
 
 //			std::cout << key << " " << value << std::endl;
 
-			this->_datacsv.insert(std::pair<std::string, double>(key, value));
+			this->_datacsv.insert(std::pair<std::string, std::string>(key, value));
 		}
 		i++;
 	}
 }
 
-static double getPrevious(std::string key, std::map<std::string, double> map)
+static float getPrevious(std::string key, std::map<std::string, std::string> map)
 {
-	std::map<std::string, double>::iterator it = map.begin();
-	std::map<std::string, double>::iterator prev;
+	std::map<std::string, std::string>::iterator it = map.begin();
+	std::map<std::string, std::string>::iterator prev;
 
+//	std::cout << it->first << ", " << key << std::endl;
+
+	if (it->first > key)
+		return 0;
 	while (it != map.end() && it->first < key)
 	{
 //		std::cout << it->first << std::endl;
 		prev = it;
 		it++;
 	}
-	return prev->second;
+	char *pEnd;
+	return (strtof(prev->second.c_str(), &pEnd));
+}
+
+/*
+ * 1/ recuper csv en map string string
+ * 2/ gnl avec throw sur chaque ligne de l'input
+ * 3/ conditions de throw : existantes + verif si dates sont correctes
+ * */
+
+void parseValue(std::string value)
+{
+	float res;
+	char *pEnd;
+
+	res = strtof(value.c_str(), &pEnd);
+	if (res < 0)
+		throw BitcoinExchange::NotPositiveException();
+	if (res > 1000)
+		throw BitcoinExchange::TooLargeException();
+	if (pEnd[0])
+		throw BitcoinExchange::NotANumberException();
+}
+
+static void checkDate(std::string year, std::string month, std::string day)
+{
+	int monthI;
+	int yearI;
+	int dayI;
+
+	yearI = atoi(year.c_str());
+	monthI = atoi(month.c_str());
+	dayI = atoi(day.c_str());
+
+	if (monthI < 1 || monthI > 12)
+		BitcoinExchange::BadInputException();
+	if (monthI == 1 || monthI == 3 || monthI == 5 || monthI == 7 || monthI == 8 || monthI == 10 || monthI == 12)
+	{
+		if (dayI > 31)
+			throw BitcoinExchange::BadInputException();
+	}
+	else
+	{
+		if (monthI == 2)
+		{
+//			float bis;
+			if (yearI % 4)
+			{
+				if (dayI > 28)
+					throw BitcoinExchange::BadInputException();
+			}
+			else
+			{
+				if (!yearI % 100)
+				{
+					if (yearI % 400) {
+						if (dayI > 28)
+							throw BitcoinExchange::BadInputException();
+					}
+				}
+				else {
+					if (dayI > 29)
+						throw BitcoinExchange::BadInputException();
+				}
+			}
+
+		}
+	}
+
+}
+
+static void parseKey(std::string key)
+{
+	size_t i;
+	size_t j = 0;
+	std::string day;
+	std::string month;
+	std::string year;
+
+
+	if (key.size() != 10)
+		throw BitcoinExchange::BadInputException();
+	i = key.find('-', 0);
+	year = key.substr(j, i - j);
+	j = i + 1;
+	i = key.find('-', j + 1);
+	month = key.substr(j, i - j);
+	j = i + 1;
+	i = key.find('-', j);
+	day = key.substr(j, i - j);
+//	std::cout << "year: " << year << ", month: " << month << ", day: " << day << std::endl;
+
+	//check 30-31 jours
+	//check fevrier
+	//check mois
+
+	checkDate(year, month, day);
+}
+
+static void parseInput(std::string key, std::string value)
+{
+	(void)key;
+	parseKey(key);
+	parseValue(value);
 }
 
 void	BitcoinExchange::display()
@@ -108,33 +208,35 @@ void	BitcoinExchange::display()
 	size_t i = 0;
 	std::string line;
 	std::string key;
-	double ivalue;
-	double cvalue;
-	double result;
-//	int error = 0;
+	std::string value;
+	float fvalue;
+	char *pEnd;
 
+	if (this->_datacsv.empty())
+		return ;
 	while (std::getline(this->_input, line))
 	{
 		if (check_first(line, i, 1))
 		{
-			key = getKey(line, 1);;
-			ivalue = this->getValue(line, 1);
-
-			if (ivalue < 0)
-				throw NotPositiveException();
-			else if (ivalue > 1000)
-				throw TooLargeException();
-//			else if (error)
-//				throw NotANumberException();
-			else
+			try
 			{
-				std::cout << key << " => " << ivalue << " = ";
+				key = getKey(line, 1);;
+				value = this->getValue(line, 1);
+				parseInput(key, value);
+				std::cout << key << " => " << value << " = ";
 				if (this->_datacsv.find(key) != this->_datacsv.end())
-					cvalue = this->_datacsv.at(key);
+					fvalue = strtof(this->_datacsv.at(key).c_str(), &pEnd);
 				else
-					cvalue = getPrevious(key, this->_datacsv);
-				result = ivalue * cvalue;
-				std::cout << result << std::endl;
+					fvalue = getPrevious(key, this->_datacsv);
+				std::cout << fvalue * strtof(value.c_str(), &pEnd) << std::endl;
+			}
+			catch (BitcoinExchange::BadInputException &e)
+			{
+				std::cout << e.what() << key << std::endl;
+			}
+			catch (std::exception &e)
+			{
+				std::cout << e.what() << std::endl;
 			}
 		}
 		i++;
