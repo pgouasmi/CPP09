@@ -41,34 +41,11 @@ static void isNbCorrect(long long nb, char *pEnd)
 		throw PmergeMe::ErrorException();
 }
 
-//void PmergeMe::sortPairs()
-//{
-//	for (std::vector<std::vector<std::pair<int, size_t> > >::iterator it = this->_pairs.begin(); it != this->_pairs.end(); ++it)
-//	{
-//		if (it->size() > 1) {
-//			std::vector<std::pair<int, size_t > >::iterator B = it->begin();
-//			std::vector<std::pair<int, size_t > >::iterator E = it->end();
-//			--E;
-//			if (*E > *B && E != B) {
-//				std::pair<int, size_t> temp;
-//				temp = *E;
-//				*E = *B;
-//				*B = temp;
-//			}
-//		}
-//	}
-//	std::cout << "After: " << std::endl;
-//	this->printPairs();
-//}
-
-static void fusion(std::vector<std::pair<int, size_t> > &arr, std::vector<std::pair<int, size_t> > &left, std::vector<std::pair<int, size_t> > &right)
+static void fusion(std::vector<std::pair<int, int> > &arr, std::vector<std::pair<int, int> > &left, std::vector<std::pair<int, int> > &right)
 {
-	std::vector<std::pair<int, size_t > >::iterator lit = left.begin();
-	std::vector<std::pair<int, size_t > >::iterator rit = right.begin();
-	std::vector<std::pair<int, size_t > >::iterator ait = arr.begin();
-//	++lit;
-//	++rit;
-//	++ait;
+	std::vector<std::pair<int, int > >::iterator lit = left.begin();
+	std::vector<std::pair<int, int > >::iterator rit = right.begin();
+	std::vector<std::pair<int, int > >::iterator ait = arr.begin();
 	while (lit != left.end() && rit != right.end())
 	{
 		if (lit->first < rit->first) {
@@ -98,140 +75,78 @@ static void fusion(std::vector<std::pair<int, size_t> > &arr, std::vector<std::p
 		rit++;
 		ait++;
 	}
-
-//	for (std::vector<std::pair<int, size_t> >::iterator it = arr.begin() ; it != arr.end() ; ++it)
-//	{
-//		std::cout << it->first << " " << it->second << std::endl;
-//	}
-//	std::cout << std::endl;
 }
 
-void PmergeMe::sortPairs(std::vector<std::pair<int, size_t> >& arr)
-{
-	size_t	i = 0;
+void PmergeMe::sortPairs(std::vector<std::pair<int, int> >& arr) {
+	size_t i = 0;
 	size_t middle = arr.size() / 2;
-	std::vector<std::pair<int, size_t> > left;
-	std::vector<std::pair<int, size_t> > right;
+	std::vector<std::pair<int, int> > left;
+	std::vector<std::pair<int, int> > right;
 
 	if (arr.size() > 1) {
-		for (std::vector<std::pair<int, size_t> >::iterator it = arr.begin(); it != arr.end(); ++it) {
+		for (std::vector<std::pair<int, int> >::iterator it = arr.begin(); it != arr.end(); ++it) {
 			if (i < middle)
 				left.push_back(*it);
 			else
 				right.push_back(*it);
 			i++;
 		}
-//		arr.clear();
 		sortPairs(left);
 		sortPairs(right);
 		fusion(arr, left, right);
 	}
-
-//	else
-//		fusion(arr, left, right);
-//	for (std::vector<std::pair<int, size_t> >::iterator it = arr.begin() ; it != arr.end() ; ++it)
-//	{
-//		std::cout << it->first << " " << it->second << std::endl;
-//	}
 }
 
-//void PmergeMe::printLargest()
-//{
-//	std::cout << "largest:" << std::endl;
-//	for (std::vector<std::pair<int, size_t> >::iterator it;  it != this->_largest.end() ; ++it)
-//	{
-//		std::cout << it->first << " " << it->second << std::endl;
-//	}
-//}
-//
-//void PmergeMe::printSmallest()
-//{
-//	std::cout << "smallest:" << std::endl;
-//	for (std::vector<std::pair<int, size_t> >::iterator it;  it != this->_smallest.end() ; ++it)
-//	{
-//		std::cout << it->first << " " << it->second << std::endl;
-//	}
-//}
-
-void PmergeMe::splitPairs()
+void PmergeMe::orderPairs()
 {
-	for (std::vector<std::vector<std::pair<int, size_t> > >::iterator it = this->_pairs.begin() ; it != this->_pairs.end() ; ++it)
+	for (std::vector<std::pair<int, int> >::iterator it = this->_pairs.begin() ; it != this->_pairs.end() ; ++it)
 	{
-		std::pair<int, size_t> first = it->front();
-		std::pair<int, size_t> second = it->back();
-
-//		std::cout << "first = " << first.first << " " << first.second << std::endl;
-//		std::cout << "second = " << second.first << " " << second.second << std::endl;
-//		if (first == second)
-//			this->_smallest.push_back(first);
-		if (first.first > second.first)
+		if (it->first < it->second)
 		{
-			this->_largest.push_back(first);
-			this->_smallest.push_back(second);
-		}
-		else
-		{
-			this->_largest.push_back(second);
-			this->_smallest.push_back(first);
+			int temp = it->first;
+			it->first = it->second;
+			it->second = temp;
 		}
 	}
-//	this->printLargest();
-//	this->printSmallest();
 }
 
 void PmergeMe::makePairs()
 {
 	std::vector<int>::iterator inputIterator = this->_vec.begin();
-	size_t i = 1;
 	while (inputIterator != this->_vec.end())
 	{
-		std::vector<std::pair<int, size_t> > temp;
-		temp.push_back(std::pair<int, size_t>(*inputIterator, i));
+		std::vector<int>::iterator next = inputIterator;
+		++next;
+		std::vector<std::pair<int, int> > temp;
+		if (next != this->_vec.end())
+			this->_pairs.push_back(std::pair<int, int>(*inputIterator,* next));
+		else
+			this->_pairs.push_back(std::pair<int, int>(*inputIterator, -1));
 		++inputIterator;
-		if (inputIterator == this->_vec.end())
-		{
-			this->_pairs.push_back(temp);
-			break ;
-		}
-		temp.push_back(std::pair<int, size_t>(*inputIterator, i));
-		this->_pairs.push_back(temp);
-		++inputIterator;
-		i++;
+		if (inputIterator != this->_vec.end())
+			++inputIterator;
 	}
-//	std::cout << "Before: " << std::endl;
-//	this->printPairs();
+	std::cout << "Before sorting pairs 2: " << std::endl;
+	this->printPairs();
 	this->_vec.clear();
-	this->splitPairs();
-}
-
-void PmergeMe::reorderSmallest()
-{
-	std::vector<std::pair<int, size_t > > temp;
-	std::vector<std::pair<int, size_t> >::iterator sit = ++this->_smallest.begin();
-
-	printBiggest();
-	printSmallest();
-
-	for (std::vector<std::pair<int, size_t> >::iterator lit = this->_largest.begin(); lit != _largest.end() ; ++lit)
+	this->orderPairs();
+	std::pair<int, int> last = this->_pairs.back();
+	if (last.second == -1)
 	{
-		while (sit != this->_smallest.end() && sit->second != lit->second)
-			sit++;
-		temp.push_back(std::pair<int, size_t>(sit->first, sit->second));
-		sit = this->_smallest.begin();
+		this->_lonely = last;
+		this->_pairs.pop_back();
 	}
-	this->_smallest = temp;
-	printSmallest();
+	std::cout << "After sorting pairs 2: " << std::endl;
+	this->printPairs();
 }
 
-void	PmergeMe::vecFJ()
+void	PmergeMe::vectorFordJohnson()
 {
 	this->makePairs();
-	this->sortPairs(this->_largest);
-//	for (std::vector<std::pair<int, size_t> >::iterator it = this->_largest.begin() ; it != this->_largest.end() ; ++it)
-//	{
-//		std::cout << it->first << " " << it->second << std::endl;
-//	}
-	this->reorderSmallest();
+	this->sortPairs(this->_pairs);
+
+	std::cout << "After merge sort:" << std::endl;
+	this->printPairs();
 }
 
 PmergeMe::PmergeMe(char **argv)
@@ -239,6 +154,8 @@ PmergeMe::PmergeMe(char **argv)
 	//init time
 	this->_elementsNb = 0;
 	std::string temp;
+	this->_lonely.first = -1;
+	this->_lonely.second = -1;
 
 	for (size_t i = 1; argv[i] ; ++i)
 	{
@@ -252,7 +169,7 @@ PmergeMe::PmergeMe(char **argv)
 		this->_vec.push_back(static_cast<int>(nb));
 	}
 //	this->printVector();
-	this->vecFJ();
+	this->vectorFordJohnson();
 
 	//print time
 	//init time
@@ -275,29 +192,8 @@ void PmergeMe::printVector()
 
 void PmergeMe::printPairs()
 {
-	for (std::vector<std::vector<std::pair<int, size_t> > >::iterator it = this->_pairs.begin();  it != this->_pairs.end() ; ++it)
+	for (std::vector<std::pair<int, int>  >::iterator it = this->_pairs.begin();  it != this->_pairs.end() ; ++it)
 	{
-		for (std::vector<std::pair<int, size_t> >::iterator that = it->begin(); that != it->end() ; ++that)
-		{
-			std::cout << that->first << " " << that->second << std::endl;
-		}
-		std::cout << std::endl;
-	}
-}
-
-void PmergeMe::printSmallest() {
-	std::cout << "smallest:" <<std::endl;
-	for (std::vector<std::pair<int, size_t> >::iterator it = this->_smallest.begin();
-		 it != this->_smallest.end(); ++it) {
-			std::cout << it->first << " " << it->second << std::endl;
-	}
-	std::cout << std::endl;
-}
-
-void PmergeMe::printBiggest() {
-	std::cout << "largest:" <<std::endl;
-	for (std::vector<std::pair<int, size_t> >::iterator it = this->_largest.begin();
-		 it != this->_largest.end(); ++it) {
 		std::cout << it->first << " " << it->second << std::endl;
 	}
 	std::cout << std::endl;

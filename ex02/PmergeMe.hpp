@@ -23,24 +23,21 @@
 class PmergeMe {
 private:
 	std::vector<int> _vec;
-	std::vector<std::vector<std::pair<int, size_t> > > _pairs;
-	std::vector<std::pair<int, size_t> > _largest;
-	std::vector<std::pair<int, size_t > > _smallest;
+	std::vector<std::pair<int, int> > _pairs;
+	std::pair<int, int> _lonely;
 	int _elementsNb;
 
 	PmergeMe();
 
-	void vecFJ();
+	void vectorFordJohnson();
 	void makePairs();
-	void sortPairs(std::vector<std::pair<int, size_t> > &arr);
-	void sendLargest();
-	void splitPairs();
+	void sortPairs(std::vector<std::pair<int, int> > &arr);
+	void orderPairs();
 	void reorderSmallest();
 
 	void printPairs();
 	void printVector();
 	void printSmallest();
-	void printLargest();
 	void printBiggest();
 
 public:
