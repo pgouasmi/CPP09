@@ -32,14 +32,16 @@ private:
 
 	void vecFJ();
 	void makePairs();
-	void sortPairs(std::vector<std::pair<int, size_t> > arr);
+	void sortPairs(std::vector<std::pair<int, size_t> > &arr);
 	void sendLargest();
 	void splitPairs();
+	void reorderSmallest();
 
 	void printPairs();
 	void printVector();
 	void printSmallest();
 	void printLargest();
+	void printBiggest();
 
 public:
 	PmergeMe(char **argv);

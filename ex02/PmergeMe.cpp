@@ -61,14 +61,14 @@ static void isNbCorrect(long long nb, char *pEnd)
 //	this->printPairs();
 //}
 
-static void fusion(std::vector<std::pair<int, size_t> > arr, std::vector<std::pair<int, size_t> > left, std::vector<std::pair<int, size_t> > right)
+static void fusion(std::vector<std::pair<int, size_t> > &arr, std::vector<std::pair<int, size_t> > &left, std::vector<std::pair<int, size_t> > &right)
 {
 	std::vector<std::pair<int, size_t > >::iterator lit = left.begin();
 	std::vector<std::pair<int, size_t > >::iterator rit = right.begin();
 	std::vector<std::pair<int, size_t > >::iterator ait = arr.begin();
-	++lit;
-	++rit;
-	++ait;
+//	++lit;
+//	++rit;
+//	++ait;
 	while (lit != left.end() && rit != right.end())
 	{
 		if (lit->first < rit->first) {
@@ -84,14 +84,29 @@ static void fusion(std::vector<std::pair<int, size_t> > arr, std::vector<std::pa
 		}
 		ait++;
 	}
-	for (std::vector<std::pair<int, size_t> >::iterator it = arr.begin() ; it != arr.end() ; ++it)
+	while (lit != left.end())
 	{
-		std::cout << it->first << " " << it->second << std::endl;
+		ait->first = lit->first;
+		ait->second = lit->second;
+		lit++;
+		ait++;
 	}
-	std::cout << std::endl;
+	while (rit != right.end())
+	{
+		ait->first = rit->first;
+		ait->second = rit->second;
+		rit++;
+		ait++;
+	}
+
+//	for (std::vector<std::pair<int, size_t> >::iterator it = arr.begin() ; it != arr.end() ; ++it)
+//	{
+//		std::cout << it->first << " " << it->second << std::endl;
+//	}
+//	std::cout << std::endl;
 }
 
-void PmergeMe::sortPairs(std::vector<std::pair<int, size_t> > arr)
+void PmergeMe::sortPairs(std::vector<std::pair<int, size_t> >& arr)
 {
 	size_t	i = 0;
 	size_t middle = arr.size() / 2;
@@ -106,11 +121,14 @@ void PmergeMe::sortPairs(std::vector<std::pair<int, size_t> > arr)
 				right.push_back(*it);
 			i++;
 		}
+//		arr.clear();
 		sortPairs(left);
 		sortPairs(right);
-	}
-	else
 		fusion(arr, left, right);
+	}
+
+//	else
+//		fusion(arr, left, right);
 //	for (std::vector<std::pair<int, size_t> >::iterator it = arr.begin() ; it != arr.end() ; ++it)
 //	{
 //		std::cout << it->first << " " << it->second << std::endl;
@@ -144,7 +162,8 @@ void PmergeMe::splitPairs()
 
 //		std::cout << "first = " << first.first << " " << first.second << std::endl;
 //		std::cout << "second = " << second.first << " " << second.second << std::endl;
-
+//		if (first == second)
+//			this->_smallest.push_back(first);
 		if (first.first > second.first)
 		{
 			this->_largest.push_back(first);
@@ -185,18 +204,39 @@ void PmergeMe::makePairs()
 	this->splitPairs();
 }
 
+void PmergeMe::reorderSmallest()
+{
+	std::vector<std::pair<int, size_t > > temp;
+	std::vector<std::pair<int, size_t> >::iterator sit = ++this->_smallest.begin();
+
+	printBiggest();
+	printSmallest();
+
+	for (std::vector<std::pair<int, size_t> >::iterator lit = this->_largest.begin(); lit != _largest.end() ; ++lit)
+	{
+		while (sit != this->_smallest.end() && sit->second != lit->second)
+			sit++;
+		temp.push_back(std::pair<int, size_t>(sit->first, sit->second));
+		sit = this->_smallest.begin();
+	}
+	this->_smallest = temp;
+	printSmallest();
+}
+
 void	PmergeMe::vecFJ()
 {
 	this->makePairs();
 	this->sortPairs(this->_largest);
-	for (std::vector<std::pair<int, size_t> >::iterator it = this->_largest.begin() ; it != this->_largest.end() ; ++it)
-	{
-		std::cout << it->first << " " << it->second << std::endl;
-	}
+//	for (std::vector<std::pair<int, size_t> >::iterator it = this->_largest.begin() ; it != this->_largest.end() ; ++it)
+//	{
+//		std::cout << it->first << " " << it->second << std::endl;
+//	}
+	this->reorderSmallest();
 }
 
 PmergeMe::PmergeMe(char **argv)
 {
+	//init time
 	this->_elementsNb = 0;
 	std::string temp;
 
@@ -213,6 +253,14 @@ PmergeMe::PmergeMe(char **argv)
 	}
 //	this->printVector();
 	this->vecFJ();
+
+	//print time
+	//init time
+
+	//algo list FJ
+
+	//print
+
 }
 
 void PmergeMe::printVector()
@@ -235,4 +283,22 @@ void PmergeMe::printPairs()
 		}
 		std::cout << std::endl;
 	}
+}
+
+void PmergeMe::printSmallest() {
+	std::cout << "smallest:" <<std::endl;
+	for (std::vector<std::pair<int, size_t> >::iterator it = this->_smallest.begin();
+		 it != this->_smallest.end(); ++it) {
+			std::cout << it->first << " " << it->second << std::endl;
+	}
+	std::cout << std::endl;
+}
+
+void PmergeMe::printBiggest() {
+	std::cout << "largest:" <<std::endl;
+	for (std::vector<std::pair<int, size_t> >::iterator it = this->_largest.begin();
+		 it != this->_largest.end(); ++it) {
+		std::cout << it->first << " " << it->second << std::endl;
+	}
+	std::cout << std::endl;
 }
