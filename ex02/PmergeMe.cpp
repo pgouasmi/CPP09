@@ -140,6 +140,101 @@ void PmergeMe::makePairs()
 	this->printPairs();
 }
 
+void PmergeMe::sendFirst()
+{
+
+	this->_pairs.insert(this->_pairs.begin(), std::pair<int, int>(this->_pairs.begin()->second, -1));
+	std::vector<std::pair<int, int> >::iterator it = this->_pairs.begin();
+	++it;
+	it->second = -1;
+
+//	std::vector<std::pair<int, int> >::iterator it = this->_pairs.begin();
+//	while (it != this->_pairs.end())
+//	{
+//		this->_vec.push_back(it->first);
+//		it++;
+//	}
+//	it = this->_pairs.begin();
+//	this->_vec.insert(this->_vec.begin(), it->second);
+//	this->_pairs.erase(this->_pairs.begin());
+//
+//	std::cout << "Pairs after popping first" << std::endl;
+//	this->printPairs();
+}
+
+void PmergeMe::merge()
+{
+	for (std::vector<std::pair<int, int> >::iterator it = this->_pairs.begin(); it != this->_pairs.end(); ++it)
+	{
+		size_t range = this->getJacobsthal().second - this->getJacobsthal().first;
+		std::vector<std::pair<int, int> >::iterator last = it;
+		last += range;
+		std::vector<std::pair<int, int> >::iterator lower = this->_pairs.begin();
+		if (last == this->_pairs.end())
+			last--;
+		std::cout << "range =" << range <<  std::endl << "it = " << it->first << std::endl << "last = " << last->first << "\n distance from it =" << std::distance(it, last) << std::endl;
+		while (last >= it)
+		{
+			std::pair<int, int> toAdd;
+			if (last->second != -1) {
+				std::vector<std::pair<int, int> >::iterator upper = last;
+				toAdd = std::pair<int, int>(last->second, -1);
+				last->second = -1;
+				std::vector<std::pair<int, int> >::iterator placeToInsert = this->binarySearch(lower, upper, toAdd.first);
+				this->_pairs.insert(placeToInsert, toAdd);
+				lower = placeToInsert;
+				lower++;
+
+			}
+			--last;
+			this->printPairs();
+		}
+		std::advance(it, range);
+	}
+	if (this->_lonely.first != -1)
+		this->_pairs.insert(this->binarySearch(this->_pairs.begin(), this->_pairs.end(), this->_lonely.first),
+							std::pair<int, int>(this->_lonely.first, -1));
+}
+
+std::pair<size_t, size_t > PmergeMe::getJacobsthal()
+{
+	std::vector<size_t >::iterator end = --this->_jacobstahl.end();
+	std::vector<size_t >::iterator prev = end;
+	--prev;
+	this->_jacobstahl.push_back((2 * *prev) + *end);
+
+	end = --this->_jacobstahl.end();
+	prev = end;
+	--prev;
+	std::cout << "jacob : first = " << *prev << " second: " << *end << std::endl;
+	return (std::pair<size_t, size_t>(*prev, *end));
+}
+
+std::vector<std::pair<int, int> >::iterator PmergeMe::binarySearch(std::vector<std::pair<int, int> >::iterator begin, std::vector<std::pair<int, int> >::iterator end, int toInsert)
+{
+//	std::cout << "bf all, begin: " << *begin << " end:" << *end << std::endl;
+	size_t distance = std::distance(begin, end);
+	std::vector<std::pair<int, int> >::iterator middle;
+	while (distance > 1)
+	{
+		 middle = begin;
+		size_t i = 0;
+		while (i < distance/2)
+		{
+			++middle;
+			i++;
+		}
+		if (middle->first > toInsert)
+			end = middle;
+		else
+			begin = middle;
+		distance = std::distance(begin, end);
+	}
+	if (toInsert < begin->first)
+		return begin;
+	return (end);
+}
+
 void	PmergeMe::vectorFordJohnson()
 {
 	this->makePairs();
@@ -147,6 +242,20 @@ void	PmergeMe::vectorFordJohnson()
 
 	std::cout << "After merge sort:" << std::endl;
 	this->printPairs();
+
+	this->sendFirst();
+	std::cout << "after send to final" << std::endl;
+	this->printVector();
+
+	this->printPairs();
+
+	this->merge();
+//	int toAdd = 89;
+//	std::cout << "to add " << toAdd << " need to insert it before " << this->binarySearch(this->_pairs.begin(), --this->_pairs.end(), toAdd)->first;
+
+	std::cout << "final: " << std::endl;
+	this->printPairs();
+
 }
 
 PmergeMe::PmergeMe(char **argv)
@@ -156,6 +265,8 @@ PmergeMe::PmergeMe(char **argv)
 	std::string temp;
 	this->_lonely.first = -1;
 	this->_lonely.second = -1;
+	this->_jacobstahl.push_back(1);
+	this->_jacobstahl.push_back(1);
 
 	for (size_t i = 1; argv[i] ; ++i)
 	{

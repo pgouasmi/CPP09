@@ -25,6 +25,7 @@ private:
 	std::vector<int> _vec;
 	std::vector<std::pair<int, int> > _pairs;
 	std::pair<int, int> _lonely;
+	std::vector<size_t> _jacobstahl;
 	int _elementsNb;
 
 	PmergeMe();
@@ -34,6 +35,10 @@ private:
 	void sortPairs(std::vector<std::pair<int, int> > &arr);
 	void orderPairs();
 	void reorderSmallest();
+	void sendFirst();
+	void merge();
+	std::pair<size_t, size_t > getJacobsthal();
+	std::vector<std::pair<int, int> >::iterator binarySearch(std::vector<std::pair<int, int> >::iterator begin, std::vector<std::pair<int, int> >::iterator end, int toInsert);
 
 	void printPairs();
 	void printVector();
