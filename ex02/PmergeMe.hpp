@@ -17,33 +17,64 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <list>
 #include <climits>
 
 
 class PmergeMe {
 private:
-	std::vector<int> _vec;
-	std::vector<std::pair<int, int> > _pairs;
+	PmergeMe();
+
+	/*common data*/
 	std::pair<int, int> _lonely;
 	std::vector<size_t> _jacobstahl;
 	int _elementsNb;
 
-	PmergeMe();
-
-	void vectorFordJohnson();
-	void makePairs();
-	void sortPairs(std::vector<std::pair<int, int> > &arr);
-	void orderPairs();
-	void reorderSmallest();
-	void sendFirst();
-	void merge();
+	/*common methods*/
 	std::pair<size_t, size_t > getJacobsthal();
-	std::vector<std::pair<int, int> >::iterator binarySearch(std::vector<std::pair<int, int> >::iterator begin, std::vector<std::pair<int, int> >::iterator end, int toInsert);
+	template<typename T>
+	void orderPairs(T &c);
+	template<typename T>
+	void sendFirst(T &c);
 
-	void printPairs();
-	void printVector();
-	void printSmallest();
-	void printBiggest();
+	template<typename T>
+	typename T::iterator binarySearch(T begin, T end, int toInsert);
+	/*prints*/
+	template<typename T>
+	void printPairs(const T &c);
+	template<typename T>
+	void printSimpleContainer(const T & c);
+	template<typename T>
+	void printPairsFirstElement(const T &c);
+
+
+	//VECTOR
+	/*vector related methods*/
+	void vectorFordJohnson();
+	void makePairsV();
+	void vectorMerge(std::vector<std::pair<int, int> > &arr);
+	void vectorInsert();
+
+
+	/*vector related data*/
+	std::vector<int> _vec;
+	std::vector<std::pair<int, int> > _vPairs;
+	//VECTOR
+
+
+
+	//LIST
+	/*list related data*/
+	std::list<int> _lst;
+	std::list<std::pair<int, int> > _lPairs;
+
+	/*list related methods*/
+	void listFordJohnson();
+	void makePairsL();
+	void listMerge(std::list<std::pair<int, int> > &lst);
+	void listInsert();
+	//LIST
+
 
 public:
 	PmergeMe(char **argv);
