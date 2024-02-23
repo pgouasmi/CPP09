@@ -126,8 +126,8 @@ void PmergeMe::makePairs()
 		if (inputIterator != this->_vec.end())
 			++inputIterator;
 	}
-	std::cout << "Before sorting pairs 2: " << std::endl;
-	this->printPairs();
+//	std::cout << "Before sorting pairs 2: " << std::endl;
+//	this->printPairs();
 	this->_vec.clear();
 	this->orderPairs();
 	std::pair<int, int> last = this->_pairs.back();
@@ -136,8 +136,8 @@ void PmergeMe::makePairs()
 		this->_lonely = last;
 		this->_pairs.pop_back();
 	}
-	std::cout << "After sorting pairs 2: " << std::endl;
-	this->printPairs();
+//	std::cout << "After sorting pairs 2: " << std::endl;
+//	this->printPairs();
 }
 
 void PmergeMe::sendFirst()
@@ -164,32 +164,104 @@ void PmergeMe::sendFirst()
 
 void PmergeMe::merge()
 {
-	for (std::vector<std::pair<int, int> >::iterator it = this->_pairs.begin(); it != this->_pairs.end(); ++it)
+	std::vector<std::pair<int, int> >::iterator it = this->_pairs.begin();
+	++it;
+	++it;
+	while (it != this->_pairs.end())
 	{
-		size_t range = this->getJacobsthal().second - this->getJacobsthal().first;
+		std::pair<size_t, size_t> temp = this->getJacobsthal();
+		size_t range = temp.second - temp.first;
 		std::vector<std::pair<int, int> >::iterator last = it;
-		last += range;
+
+		std::cout << "/*0*/" << std::endl;
+		std::cout << "range = " << range<< std::endl;
+		std::cout << "distance between last et end = " << std::distance(last, this->_pairs.end()) << std::endl;
+		std::cout << "it = " << it->first << std::endl;
+		std::cout << "last =" << last->first << std::endl << std::endl;
+
+
+		if (range <= static_cast<size_t>(std::distance(last, this->_pairs.end()))) {
+			std::cout << "got  in range ok" << std::endl;
+			last += range - 1;
+		}
+		else {
+			last = this->_pairs.end();
+			--last;
+		}
 		std::vector<std::pair<int, int> >::iterator lower = this->_pairs.begin();
 		if (last == this->_pairs.end())
-			last--;
-		std::cout << "range =" << range <<  std::endl << "it = " << it->first << std::endl << "last = " << last->first << "\n distance from it =" << std::distance(it, last) << std::endl;
-		while (last >= it)
+			--last;
+
+		std::cout << "/*1*/" << std::endl;
+		std::cout << "range =" << range <<  std::endl;
+		std::cout << "it = " << it->first << std::endl;
+		std::cout << "last = " << last->first << std::endl;
+		std::cout << "distance from it =" << std::distance(it, last) << std::endl << std::endl;
+		this->printPairs();
+
+		std::vector<std::pair<int, int> >::iterator upper = last;
+		std::vector<std::pair<int , int > >::iterator prev = it;
+		--prev;
+
+		while (last != prev)
 		{
 			std::pair<int, int> toAdd;
-			if (last->second != -1) {
-				std::vector<std::pair<int, int> >::iterator upper = last;
+			if (last->second != -1)
+			{
+				if (last->second == 32)
+					std::cout << "32 FOUNDDDDDDDDDDDDDDD" << std::endl;
+				std::cout << "/*2*/" << std::endl;
+				std::cout << "it = " << it->first << std::endl;
+				std::cout << "prev = " << prev->first << std::endl;
+				std::cout << "lower = " << lower->first << std::endl;
+				std::cout << "upper = " << upper->first << std::endl;
+				std::cout << "last = " << last->first << std::endl << std::endl;
+				this->printPairs();
+//				std::cout << std::endl;
+//				this->printPairs();
+//				if (last == it)
+//					throw PmergeMe::ErrorException();
 				toAdd = std::pair<int, int>(last->second, -1);
 				last->second = -1;
-				std::vector<std::pair<int, int> >::iterator placeToInsert = this->binarySearch(lower, upper, toAdd.first);
+				std::vector<std::pair<int, int> >::iterator placeToInsert = this->binarySearch(this->_pairs.begin(), upper, toAdd.first);
 				this->_pairs.insert(placeToInsert, toAdd);
-				lower = placeToInsert;
-				lower++;
-
+				std::cout << "inserted " << toAdd.first << std::endl;
+				std::cout << "new pair:" << std::endl;
+				this->printPairs();
+//				lower = placeToInsert;
+//				lower++;
 			}
-			--last;
-			this->printPairs();
+			if (last->second == -1) {
+				std::cout << "last = " << last->first << std::endl;
+				std::cout << "LAST--" << std::endl;
+				last--;
+				std::cout << "NEW LAST =" << last->first << last->second << std::endl;
+			}
 		}
-		std::advance(it, range);
+		std::cout << "/*3*/" << std::endl;
+		std::cout << "last = " << last->first << std::endl << std::endl;
+		last--;
+		this->printPairs();
+		std::cout << "/4/\nin increment it, initial: " << it->first << std::endl;
+		while (range && it != this->_pairs.end())
+		{
+			std::cout << "decrementing range" << std::endl;
+
+//			if (it == this->_pairs.end()) {
+//				std::cout << "END FOUND FOR ITTTTTTTTTTTTTTTTT" << std::endl;
+//				break;
+//			}
+			range--;
+			it++;
+		}
+		if (it != this->_pairs.end())
+			std::cout << "/4/\nin increment it, FINAL: " << it->first << std::endl << std::endl;
+//		if (static_cast<size_t>(std::distance(it, this->_pairs.end())) <= range)
+//			it = this->_pairs.end();
+//		else
+//			std::advance(it, range);
+////		if (++it == this->_pairs.end())
+////		++it;
 	}
 	if (this->_lonely.first != -1)
 		this->_pairs.insert(this->binarySearch(this->_pairs.begin(), this->_pairs.end(), this->_lonely.first),
@@ -206,7 +278,7 @@ std::pair<size_t, size_t > PmergeMe::getJacobsthal()
 	end = --this->_jacobstahl.end();
 	prev = end;
 	--prev;
-	std::cout << "jacob : first = " << *prev << " second: " << *end << std::endl;
+//	std::cout << "jacob : first = " << *prev << " second: " << *end << std::endl;
 	return (std::pair<size_t, size_t>(*prev, *end));
 }
 
@@ -217,7 +289,7 @@ std::vector<std::pair<int, int> >::iterator PmergeMe::binarySearch(std::vector<s
 	std::vector<std::pair<int, int> >::iterator middle;
 	while (distance > 1)
 	{
-		 middle = begin;
+		middle = begin;
 		size_t i = 0;
 		while (i < distance/2)
 		{
@@ -237,15 +309,16 @@ std::vector<std::pair<int, int> >::iterator PmergeMe::binarySearch(std::vector<s
 
 void	PmergeMe::vectorFordJohnson()
 {
+	this->_pairs.reserve(this->_elementsNb + 1);
 	this->makePairs();
 	this->sortPairs(this->_pairs);
 
-	std::cout << "After merge sort:" << std::endl;
-	this->printPairs();
-
+//	std::cout << "After merge sort:" << std::endl;
+//	this->printPairs();
+//
 	this->sendFirst();
 	std::cout << "after send to final" << std::endl;
-	this->printVector();
+//	this->printVector();
 
 	this->printPairs();
 
