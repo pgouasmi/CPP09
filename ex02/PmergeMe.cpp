@@ -233,7 +233,7 @@ void PmergeMe::vectorInsert()
 			{
 				toAdd = std::pair<int, int>(last->second, -1);
 				last->second = -1;
-				std::vector<std::pair<int, int> >::iterator placeToInsert = this->binarySearch(this->_vPairs.begin(), upper, toAdd.first);
+				std::vector<std::pair<int, int> >::iterator placeToInsert = this->vectorBinarySearch(this->_vPairs.begin(), upper, toAdd.first);
 				this->_vPairs.insert(placeToInsert, toAdd);
 			}
 			if (last->second == -1) {
@@ -248,8 +248,32 @@ void PmergeMe::vectorInsert()
 		}
 	}
 	if (this->_lonely.first != -1)
-		this->_vPairs.insert(this->binarySearch(this->_vPairs.begin(), this->_vPairs.end(), this->_lonely.first),
+		this->_vPairs.insert(this->vectorBinarySearch(this->_vPairs.begin(), this->_vPairs.end(), this->_lonely.first),
 							std::pair<int, int>(this->_lonely.first, -1));
+}
+
+std::vector<std::pair<int,int> >::iterator PmergeMe::vectorBinarySearch(std::vector<std::pair<int,int> >::iterator begin, std::vector<std::pair<int,int> >::iterator end, int toInsert)
+{
+	size_t distance = std::distance(begin, end);
+	std::vector<std::pair<int,int> >::iterator middle;
+	while (distance > 1)
+	{
+		middle = begin;
+		size_t i = 0;
+		while (i < distance/2)
+		{
+			++middle;
+			i++;
+		}
+		if (middle->first > toInsert)
+			end = middle;
+		else
+			begin = middle;
+		distance = std::distance(begin, end);
+	}
+	if (toInsert < begin->first)
+		return begin;
+	return (end);
 }
 
 void PmergeMe::listInsert()
@@ -283,7 +307,7 @@ void PmergeMe::listInsert()
 			{
 				toAdd = std::pair<int, int>(last->second, -1);
 				last->second = -1;
-				std::list<std::pair<int, int> >::iterator placeToInsert = this->binarySearch(this->_lPairs.begin(), upper, toAdd.first);
+				std::list<std::pair<int, int> >::iterator placeToInsert = this->listBinarySearch(this->_lPairs.begin(), upper, toAdd.first);
 				this->_lPairs.insert(placeToInsert, toAdd);
 			}
 			if (last->second == -1) {
@@ -298,28 +322,14 @@ void PmergeMe::listInsert()
 		}
 	}
 	if (this->_lonely.first != -1)
-		this->_vPairs.insert(this->binarySearch(this->_lPairs.begin(), this->_lPairs.end(), this->_lonely.first),
+		this->_lPairs.insert(this->listBinarySearch(this->_lPairs.begin(), this->_lPairs.end(), this->_lonely.first),
 							 std::pair<int, int>(this->_lonely.first, -1));
 }
 
-std::pair<size_t, size_t > PmergeMe::getJacobsthal()
-{
-	std::vector<size_t >::iterator end = --this->_jacobstahl.end();
-	std::vector<size_t >::iterator prev = end;
-
-	--prev;
-	this->_jacobstahl.push_back((2 * *prev) + *end);
-	end = --this->_jacobstahl.end();
-	prev = end;
-	--prev;
-	return (std::pair<size_t, size_t>(*prev, *end));
-}
-
-template<typename T>
-typename T::iterator binarySearch(typename T::iterator begin, typename T::iterator end, int toInsert)
+std::list<std::pair<int,int> >::iterator PmergeMe::listBinarySearch(std::list<std::pair<int,int> >::iterator begin, std::list<std::pair<int,int> >::iterator end, int toInsert)
 {
 	size_t distance = std::distance(begin, end);
-	typename T::iterator middle;
+	std::list<std::pair<int,int> >::iterator middle;
 	while (distance > 1)
 	{
 		middle = begin;
@@ -340,6 +350,19 @@ typename T::iterator binarySearch(typename T::iterator begin, typename T::iterat
 	return (end);
 }
 
+std::pair<size_t, size_t > PmergeMe::getJacobsthal()
+{
+	std::vector<size_t >::iterator end = --this->_jacobstahl.end();
+	std::vector<size_t >::iterator prev = end;
+
+	--prev;
+	this->_jacobstahl.push_back((2 * *prev) + *end);
+	end = --this->_jacobstahl.end();
+	prev = end;
+	--prev;
+	return (std::pair<size_t, size_t>(*prev, *end));
+}
+
 void	PmergeMe::vectorFordJohnson()
 {
 	this->_vPairs.reserve(this->_elementsNb + 1);
@@ -347,8 +370,6 @@ void	PmergeMe::vectorFordJohnson()
 	this->vectorMerge(this->_vPairs);
 	this->sendFirst(this->_vPairs);
 	this->vectorInsert();
-	std::cout << "final: " << std::endl;
-	this->printPairsFirstElement(this->_vPairs);
 }
 
 void PmergeMe::makePairsL()
@@ -380,17 +401,24 @@ void PmergeMe::makePairsL()
 void	PmergeMe::listFordJohnson()
 {
 	this->makePairsL();
-	this->printPairs(this->_lPairs);
-
-
 	this->listMerge(this->_lPairs);
 	this->sendFirst(this->_lPairs);
-
-	this->printPairs(this->_lPairs);
-
 	this->listInsert();
-//	std::cout << "final: " << std::endl;
-//	this->printPairsFirstElement();
+}
+
+void PmergeMe::startTimer()
+{
+	gettimeofday(&this->_timer.first, NULL);
+}
+
+double PmergeMe::stopTimer()
+{
+	gettimeofday(&this->_timer.second, NULL);
+
+//	long sec = this->_timer.second.tv_sec - _timer.first.tv_sec;
+//	long micro = this->_timer.second.tv_usec - _timer.first.tv_usec;
+//	return (sec + micro*1e-6);
+	return ((static_cast<double>(this->_timer.second.tv_sec) * 1000000LL + static_cast<double>(this->_timer.second.tv_usec)) - (static_cast<double>(this->_timer.first.tv_sec) * 1000000LL + static_cast<double>(this->_timer.first.tv_usec)));
 }
 
 PmergeMe::PmergeMe(char **argv)
@@ -398,6 +426,8 @@ PmergeMe::PmergeMe(char **argv)
 	/*FIRST CONTAINER*/
 	{
 		//init time
+		this->startTimer();
+
 		this->_elementsNb = 0;
 		std::string temp;
 		this->_lonely.first = -1;
@@ -417,13 +447,21 @@ PmergeMe::PmergeMe(char **argv)
 		}
 		if (this->_elementsNb == 1)
 			throw PmergeMe::ErrorException();
+		std::cout << "Before: " << std::flush;
+		this->printSimpleContainer(this->_vec);
 		this->vectorFordJohnson();
+		this->stopTimer();
+		std::cout << "After: " << std::flush;
+		this->printPairsFirstElement(this->_vPairs);
+		std::cout << "Time to process " << this->_elementsNb << " elements with std::vector : " << this->stopTimer() << " us" << std::endl;
 	}
 
 	/*SECOND CONTAINER*/
 
 	{
 		//init time
+		this->startTimer();
+
 		this->_elementsNb = 0;
 		std::string temp;
 		this->_lonely.first = -1;
@@ -444,6 +482,8 @@ PmergeMe::PmergeMe(char **argv)
 		if (this->_elementsNb == 1)
 			throw PmergeMe::ErrorException();
 		this->listFordJohnson();
+		this->stopTimer();
+		std::cout << "Time to process " << this->_elementsNb << " elements with std::list : " << this->stopTimer() << " us" << std::endl;
 	}
 }
 
@@ -461,10 +501,9 @@ template <typename T>
 void PmergeMe::printSimpleContainer(const T &c)
 {
 	for (typename T::const_iterator it = c.begin(); it != c.end() ; ++it) {
-		std::cout << *it << std::endl;
+		std::cout << " " << *it << std::flush;
 	}
 	std::cout << std::endl;
-	std::cout << "number of elements: " << this->_elementsNb << std::endl;
 }
 
 template<typename T>

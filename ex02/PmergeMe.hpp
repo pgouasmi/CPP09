@@ -19,6 +19,7 @@
 #include <vector>
 #include <list>
 #include <climits>
+#include <sys/time.h>
 
 
 class PmergeMe {
@@ -29,6 +30,7 @@ private:
 	std::pair<int, int> _lonely;
 	std::vector<size_t> _jacobstahl;
 	int _elementsNb;
+	std::pair<struct timeval, struct timeval> _timer;
 
 	/*common methods*/
 	std::pair<size_t, size_t > getJacobsthal();
@@ -36,9 +38,10 @@ private:
 	void orderPairs(T &c);
 	template<typename T>
 	void sendFirst(T &c);
+	void startTimer();
+	double stopTimer();
 
-	template<typename T>
-	typename T::iterator binarySearch(T begin, T end, int toInsert);
+
 	/*prints*/
 	template<typename T>
 	void printPairs(const T &c);
@@ -54,6 +57,7 @@ private:
 	void makePairsV();
 	void vectorMerge(std::vector<std::pair<int, int> > &arr);
 	void vectorInsert();
+	std::vector<std::pair<int,int> >::iterator vectorBinarySearch(std::vector<std::pair<int,int> >::iterator begin, std::vector<std::pair<int,int> >::iterator end, int toInsert);
 
 
 	/*vector related data*/
@@ -73,6 +77,7 @@ private:
 	void makePairsL();
 	void listMerge(std::list<std::pair<int, int> > &lst);
 	void listInsert();
+	std::list<std::pair<int,int> >::iterator listBinarySearch(std::list<std::pair<int,int> >::iterator begin, std::list<std::pair<int,int> >::iterator end, int toInsert);
 	//LIST
 
 
