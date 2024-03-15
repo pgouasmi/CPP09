@@ -1,6 +1,14 @@
-//
-// Created by pgouasmi on 2/19/24.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   RPN.hpp                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: pgouasmi <pgouasmi@student.42lyon.fr>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/03/15 10:36:58 by pgouasmi          #+#    #+#             */
+/*   Updated: 2024/03/15 10:36:58 by pgouasmi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #ifndef RPN_HPP
 #define RPN_HPP
@@ -15,7 +23,9 @@
 class RPN {
 private:
 	std::stack<double> _mystack;
+
 	RPN();
+
 	void calculate(std::string op);
 
 public:
@@ -38,4 +48,4 @@ class BadInputException : public std::exception
 };
 
 
-#endif //CPP09_RPN_HPP
+#endif

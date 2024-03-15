@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   PmergeMe.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pgouasmi <pgouasmi@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: pgouasmi <pgouasmi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 13:23:03 by pgouasmi          #+#    #+#             */
-/*   Updated: 2024/02/20 13:23:03 by pgouasmi         ###   ########.fr       */
+/*   Updated: 2024/03/15 16:01:38 by pgouasmi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -414,10 +414,6 @@ void PmergeMe::startTimer()
 double PmergeMe::stopTimer()
 {
 	gettimeofday(&this->_timer.second, NULL);
-
-//	long sec = this->_timer.second.tv_sec - _timer.first.tv_sec;
-//	long micro = this->_timer.second.tv_usec - _timer.first.tv_usec;
-//	return (sec + micro*1e-6);
 	return ((static_cast<double>(this->_timer.second.tv_sec) * 1000000LL + static_cast<double>(this->_timer.second.tv_usec)) - (static_cast<double>(this->_timer.first.tv_sec) * 1000000LL + static_cast<double>(this->_timer.first.tv_usec)));
 }
 
@@ -461,7 +457,6 @@ PmergeMe::PmergeMe(char **argv)
 	{
 		//init time
 		this->startTimer();
-
 		this->_elementsNb = 0;
 		std::string temp;
 		this->_lonely.first = -1;

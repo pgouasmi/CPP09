@@ -3,16 +3,29 @@
 /*                                                        :::      ::::::::   */
 /*   RPN.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pgouasmi <pgouasmi@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: pgouasmi <pgouasmi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 14:19:15 by pgouasmi          #+#    #+#             */
-/*   Updated: 2024/02/19 14:19:15 by pgouasmi         ###   ########.fr       */
+/*   Updated: 2024/03/15 16:00:01 by pgouasmi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "RPN.hpp"
 
 RPN::RPN() {}
+
+RPN::RPN(const RPN &obj)
+{
+	*this = obj;
+}
+
+RPN &RPN::operator=(const RPN &obj)
+{
+	this->_mystack = obj._mystack;
+	return *this;
+}
+
+RPN::~RPN() {}
 
 void RPN::calculate(std::string op)
 {
@@ -26,11 +39,11 @@ void RPN::calculate(std::string op)
 	double second = this->_mystack.top();
 	this->_mystack.pop();
 	if (op == "+")
-		res = first + second;
+		res = second + first;
 	else if (op == "-")
 		res = second - first;
 	else if (op == "*")
-		res = first * second;
+		res = second * first;
 	else {
 		if (!first)
 			throw DivisionByZeroException();
@@ -61,16 +74,3 @@ RPN::RPN(std::string &input)
 	if (!this->_mystack.empty())
 		std::cout << this->_mystack.top() << std::endl;
 }
-
-RPN::RPN(const RPN &obj)
-{
-	*this = obj;
-}
-
-RPN &RPN::operator=(const RPN &obj)
-{
-	this->_mystack = obj._mystack;
-	return *this;
-}
-
-RPN::~RPN() {}

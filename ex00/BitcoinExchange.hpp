@@ -25,6 +25,8 @@
 class BitcoinExchange {
 private:
 	BitcoinExchange();
+	BitcoinExchange(const BitcoinExchange &obj);
+	BitcoinExchange &operator=(const BitcoinExchange &obj);
 
 	std::map<std::string, std::string> _datacsv;
 	std::map<std::string, std::string> _datainput;
@@ -34,8 +36,6 @@ private:
 public:
 
 	BitcoinExchange(const char *arg);
-	BitcoinExchange(const BitcoinExchange &obj);
-	BitcoinExchange &operator=(const BitcoinExchange &obj);
 	~BitcoinExchange();
 
 	void scrapeCSV();

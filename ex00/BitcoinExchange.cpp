@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   BitcoinExchange.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pgouasmi <pgouasmi@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: pgouasmi <pgouasmi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/19 14:15:40 by pgouasmi          #+#    #+#             */
-/*   Updated: 2024/02/19 14:15:40 by pgouasmi         ###   ########.fr       */
+/*   Updated: 2024/03/15 15:58:52 by pgouasmi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,21 @@ BitcoinExchange::BitcoinExchange(const char *arg)
 	this->_csv.open("data.csv");
 	if (!this->_csv.is_open())
 		throw FileNonOpenableException();
+}
+
+BitcoinExchange::BitcoinExchange(const BitcoinExchange &obj)
+{
+	*this = obj;
+}
+
+BitcoinExchange &BitcoinExchange::operator=(const BitcoinExchange &obj)
+{
+	if (this != &obj)
+	{
+		this->_datacsv = obj._datacsv;
+		this->_datainput = obj._datainput;
+	}
+	return *this;
 }
 
 BitcoinExchange::~BitcoinExchange() {}
@@ -82,8 +97,6 @@ void	BitcoinExchange::scrapeCSV()
 			key = getKey(line, 0);
 			value = this->getValue(line, 0);
 
-//			std::cout << key << " " << value << std::endl;
-
 			this->_datacsv.insert(std::pair<std::string, std::string>(key, value));
 		}
 		i++;
@@ -95,25 +108,17 @@ static float getPrevious(std::string key, std::map<std::string, std::string> map
 	std::map<std::string, std::string>::iterator it = map.begin();
 	std::map<std::string, std::string>::iterator prev;
 
-//	std::cout << it->first << ", " << key << std::endl;
 
 	if (it->first > key)
 		throw BitcoinExchange::BadInputException();
 	while (it != map.end() && it->first < key)
 	{
-//		std::cout << it->first << std::endl;
 		prev = it;
 		it++;
 	}
 	char *pEnd;
 	return (strtof(prev->second.c_str(), &pEnd));
 }
-
-/*
- * 1/ recuper csv en map string string
- * 2/ gnl avec throw sur chaque ligne de l'input
- * 3/ conditions de throw : existantes + verif si dates sont correctes
- * */
 
 void parseValue(std::string value)
 {
@@ -123,8 +128,6 @@ void parseValue(std::string value)
 	res = strtof(value.c_str(), &pEnd);
 	if (res < 0)
 		throw BitcoinExchange::NotPositiveException();
-//	if (res > 999)
-//		std::cout << std::endl << res << std::endl << std::endl;
 	if (res >= 1000)
 		throw BitcoinExchange::TooLargeException();
 	if (pEnd[0])
@@ -204,11 +207,6 @@ static void parseKey(std::string key)
 	j = i + 1;
 	i = key.find('-', j);
 	day = key.substr(j, i - j);
-//	std::cout << "year: " << year << ", month: " << month << ", day: " << day << std::endl;
-
-	//check 30-31 jours
-	//check fevrier
-	//check mois
 
 	if (year.find_first_not_of("0123456789") != std::string::npos || month.find_first_not_of("0123456789") != std::string::npos || day.find_first_not_of("0123456789") != std::string::npos)
 		throw BitcoinExchange::BadInputException();
